@@ -19,6 +19,7 @@ const signUp = async (name, email, password, profileImage) => {
         return createUser;
 };
 
+
 module.exports = {
     signUp
 }
