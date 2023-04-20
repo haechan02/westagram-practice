@@ -9,8 +9,9 @@ const signUp = async (req, res) => {
         }
 
         await userService.signUp( name, email, password, profileImage );
+
         return res.status(201).json({
-            message: 'SIGNUP_SUCCESS',
+            message: 'SIGNUP_SUCCESS'
         });
         } catch (err) {
             console.log(err);
@@ -19,6 +20,7 @@ const signUp = async (req, res) => {
         });
     }
 };
+
 
 module.exports = {
     signUp

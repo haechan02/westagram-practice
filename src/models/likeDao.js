@@ -1,4 +1,5 @@
-// Likes API
+const { dataSource } = require("./dataSource")
+
 const likePosts = async (user_id, postId, res) => {
     try {
       const likePosts = await dataSource.query(
@@ -19,3 +20,4 @@ const likePosts = async (user_id, postId, res) => {
       res.status(400).json({ message: "Error has occur in LIKE USER POSTS" });
     }
 };
+
