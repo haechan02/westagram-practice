@@ -1,27 +1,38 @@
 const postDao = require('../models/postDao')
 
-const getAllPosts = async (req, res) => {
+const getAllPosts = async () => {
     try {
         const posts = await postDao.getAllPosts();
-        res.status(200).json(posts);
+        return posts;
     } catch (err) {
         console.log(err);
-        res.status(400).json({ message: "Error in getting all posts" });
+        throw new Error("Error in getting all posts/PostService");
     }
 };
 
-const getSpecificUserPost = async (req, res) => {
+const getPostById = async (postId) => {
     try {
-        const userId = req.params.userId;
-        const posts = await postDao.getUserPosts(userId);
-        res.status(200).json(posts);
+        const getPostById = await postDao.getPostById(postId);
+        return getPostById;
     } catch (err) {
         console.log(err);
-        res.status(400).json({ message: "Error in getting user posts" });
+        throw new Error("Error occurred in getting post by ID");
     }
 };
 
-const createPosts = async (userId, title, content, imageUrl, res) => {
+
+const getSpecificUserPost = async (userId) => {
+    try {
+        const posts = await postDao.getSpecificUserPost(userId);
+        return posts;
+    } catch (err) {
+        console.log(err);
+        throw new Error ("Error in getting user posts" );
+    }
+};
+
+
+const createPosts = async (userId, title, content, imageUrl ) => {
     const postCreate = await postDao.createPosts(
         userId,
         title,
@@ -32,13 +43,13 @@ const createPosts = async (userId, title, content, imageUrl, res) => {
     return postCreate;
 };
 
-const editUserPosts = async (userId, postId, title, content, imageUrl, res) => {
+const editUserPosts = async (userId, postId, title, content, imageUrl) => {
     const editPosts = await postDao.editUserPosts(
+        userId,
+        postId,
         title,
         content,
-        image_url,
-        userId,
-        postId
+        imageUrl,
     );
 
     return editPosts;
@@ -46,14 +57,20 @@ const editUserPosts = async (userId, postId, title, content, imageUrl, res) => {
 
 const deleteUserPosts = async (postId, userId) => {
     try {
-        await postDao.deleteUserPosts(postId, userId);
+        const result = await postDao.deleteUserPosts(postId, userId);
+        return result;
     } catch (error) {
         console.log(error);
-        throw new Error("Error occurred in deleting user posts");
+        throw new Error("Error occurred in deleting user posts /postService");
     }
 };
 
-
 module.exports = {
-    getAllPosts, getSpecificUserPost, createPosts, editUserPosts, deleteUserPosts
+    getPostById,
+    getAllPosts, 
+    getSpecificUserPost, 
+    createPosts, 
+    editUserPosts, 
+    deleteUserPosts,
+    getPostById
 }

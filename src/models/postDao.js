@@ -1,7 +1,7 @@
 const { dataSource } = require("./dataSource")
 
 
-const getAllPosts = async (res) => {
+const getAllPosts = async () => {
     try {
         const rows = await dataSource.query(
             `SELECT 
@@ -15,10 +15,10 @@ const getAllPosts = async (res) => {
                 INNER JOIN users ON users.id = posts.user_id
                 `
         );
-        res.status(200).json(rows);
+        return rows;
     } catch (err){
         console.log(err);
-        res.status(500).json({ message: "Error occurred in getting posts", error: err.message });
+        throw new Error("Error occurred in getting postdata /postDAO Error");
     }
 };
 
@@ -43,6 +43,22 @@ const getSpecificUserPost = async (userId) => {
   } catch (error) {
     console.log(error);
     throw new Error("Error has occurred in getting users posts");
+  }
+};
+
+const getPostById = async (postId) => {
+  try {
+    const [getPostById] = await dataSource.query(
+      `SELECT * FROM posts 
+       JOIN users ON users.id = posts.user_id
+       WHERE posts.id = ?`,
+      [postId]
+    );
+
+    return getPostById;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error has occurred with getPostById /postDAO");
   }
 };
 
@@ -83,25 +99,26 @@ const createPosts = async (userId, title, content, imageUrl) => {
 
 
 const editUserPosts = async (userId, postId, title, content, imageUrl) => {
-    try {
-      const updatePosts = await dataSource.query(
-        `UPDATE posts
-          INNER JOIN users ON posts.user_id = users.id
-          SET
-          posts.title = ?,
-          posts.content = ?,
-          posts.image_url = ?
-          WHERE users.id = ? AND posts.id = ?
-          `,
-        [title, content, imageUrl, userId, postId]
-      );
-  
-      res.status(200).json({ message: "Post updated successfully." });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ message: "Error has occur in USER EDITING API" });
-    }
+  try {
+    const updatePosts = await dataSource.query(
+      `UPDATE posts
+        INNER JOIN users ON posts.user_id = users.id
+        SET
+        posts.title = ?,
+        posts.content = ?,
+        posts.image_url = ?
+        WHERE users.id = ? AND posts.id = ?
+        `,
+      [title, content, imageUrl, userId, postId]
+    );
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error has occurred in USER EDITING API");
+  }
 };
+
 
 const deleteUserPosts = async (userId, postId) => {
   try {
@@ -112,14 +129,13 @@ const deleteUserPosts = async (userId, postId) => {
       [userId, postId]
     );
 
-    res.status(200).json({ message: "Post DELETED successfully." });
   } catch (error) {
     console.log(error);
-    res.status(400).json({ message: "Error has occurred in DELETING USER POSTS" });
+    throw new Error("Error has occurred in DELETING USER POSTS /postDAO");
   }
 };
 
 
 module.exports = {
-  getAllPosts, getSpecificUserPost, createPosts, editUserPosts, deleteUserPosts
+  getPostById, getAllPosts, getSpecificUserPost, createPosts, editUserPosts, deleteUserPosts
 }
