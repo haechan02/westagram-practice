@@ -1,66 +1,88 @@
-const { DataSource } = require("typeorm");
-
-const dataSource = new DataSource({
-    type: process.env.DB_CONNECTION,
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
-    username: process.env.DB_USERNAME,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_DATABASE,
-});
+const { dataSource } = require("./dataSource")
 
 
-dataSource
-    .initialize()
-    .then(() => {
-        console.log("Data Source has been initialized!");
-    })
-    .catch((err) => {
-        console.log("DataSource Not Initialize :", err);
-        myDataSource.destroy();
-    });
-
-// Creating Users Posts
-const createPosts = async (userEmail, title, content, imageUrl, res) => {
+const getAllPosts = async (res) => {
     try {
-        const [user] = await dataSource.query(
-            `
-              SELECT id FROM users WHERE email = ?
-              `,
-            [userEmail]
+        const rows = await dataSource.query(
+            `SELECT 
+                posts.id,
+                users.name AS Author,
+                posts.title,
+                posts.content,
+                posts.image_url,
+                posts.created_at
+                FROM posts 
+                INNER JOIN users ON users.id = posts.user_id
+                `
         );
-
-        if (user) {
-            const user_id = user.id;
-
-            await dataSource.query(
-                `INSERT INTO posts(
-                    user_id,
-                    title,
-                    content,
-                    image_url
-                    ) VALUES (
-                      ?,
-                      ?,
-                      ?,
-                      ?
-                    )
-                `,
-                [user_id, title, content, imageUrl]
-            );
-
-            res.status(201).json({ message: "🎉 post has been created successfully 🎉 " });
-        } else {
-            res.status(404).json({ message: "User not found" });
-        }
-    } catch (err) {
+        res.status(200).json(rows);
+    } catch (err){
         console.log(err);
-        res.status(500).json({ message: "Error occurred in CREATING POSTS", error: err.message });
+        res.status(500).json({ message: "Error occurred in getting posts", error: err.message });
     }
 };
 
-// Editing User's Posts API
-const editUserPosts = async (userId, postId, title, content, imageUrl, res) => {
+const getSpecificUserPost = async (userId) => {
+  try {
+    const gettingUserPosts = await dataSource.query(
+      `SELECT 
+        users.id,
+        users.name AS Author,
+        posts.title,
+        posts.content,
+        posts.image_url,
+        posts.created_at
+        FROM posts 
+        INNER JOIN users ON users.id = posts.user_id
+        WHERE users.id = ?
+        `,
+      [userId]
+    );
+
+    return gettingUserPosts;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Error has occurred in getting users posts");
+  }
+};
+
+const createPosts = async (userId, title, content, imageUrl) => {
+  try {
+    const [user] = await dataSource.query(
+      `SELECT id FROM users WHERE id = ?`,
+      [userId]
+    );
+
+    if (user) {
+      const user_id = user.id;
+
+      await dataSource.query(
+        `INSERT INTO posts(
+          user_id,
+          title,
+          content,
+          image_url
+        ) VALUES (
+          ?,
+          ?,
+          ?,
+          ?
+        )`,
+        [user_id, title, content, imageUrl]
+      );
+
+      return { message: "🎉 post has been created successfully 🎉 " };
+    } else {
+      throw new Error("User not found");
+    }
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error occurred in CREATING POSTS: " + err.message);
+  }
+};
+
+
+const editUserPosts = async (userId, postId, title, content, imageUrl) => {
     try {
       const updatePosts = await dataSource.query(
         `UPDATE posts
@@ -81,25 +103,23 @@ const editUserPosts = async (userId, postId, title, content, imageUrl, res) => {
     }
 };
 
-// Deleting User's Posts API
-const deletingUserPosts = async (postsId, res) => {
-    try {
-      const deletePosts = await dataSource.query(
-        `DELETE FROM posts
-          WHERE posts.id = ${postsId}
-          `
-      );
-  
-      res.status(200).json({ message: "Post DELETED successfully." });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ message: "Error has occur in DELETING USER POSTS" });
-    }
+const deleteUserPosts = async (userId, postId) => {
+  try {
+    const deletePosts = await dataSource.query(
+      `DELETE FROM posts
+       WHERE posts.id = ? 
+      `,
+      [userId, postId]
+    );
+
+    res.status(200).json({ message: "Post DELETED successfully." });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ message: "Error has occurred in DELETING USER POSTS" });
+  }
 };
 
 
-
-
 module.exports = {
-    createPosts, editUserPosts, deletingUserPosts
+  getAllPosts, getSpecificUserPost, createPosts, editUserPosts, deleteUserPosts
 }

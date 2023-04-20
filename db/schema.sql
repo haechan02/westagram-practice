@@ -17,7 +17,7 @@
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `comments` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `content` varchar(3000) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `content` varchar(3000) DEFAULT NULL,
   `user_id` int NOT NULL,
   `post_id` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -27,7 +27,7 @@ CREATE TABLE `comments` (
   KEY `comments_post_id_fkey` (`post_id`),
   CONSTRAINT `comments_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`),
   CONSTRAINT `comments_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -42,11 +42,11 @@ CREATE TABLE `likes` (
   `post_id` int NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `post_id` (`post_id`),
-  CONSTRAINT `likes_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  CONSTRAINT `likes_ibfk_2` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  UNIQUE KEY `unique_user_post` (`user_id`,`post_id`),
+  KEY `likes_post_id_fkey` (`post_id`),
+  CONSTRAINT `likes_post_id_fkey` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`),
+  CONSTRAINT `likes_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -57,16 +57,16 @@ CREATE TABLE `likes` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `posts` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
-  `title` varchar(300) COLLATE utf8mb4_general_ci NOT NULL,
-  `content` varchar(500) COLLATE utf8mb4_general_ci NOT NULL,
-  `image_url` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `user_id` int NOT NULL,
+  `title` varchar(300) NOT NULL,
+  `content` varchar(500) NOT NULL,
+  `image_url` varchar(255) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `posts_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -76,9 +76,9 @@ CREATE TABLE `posts` (
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `schema_migrations` (
-  `version` varchar(128) COLLATE utf8mb4_general_ci NOT NULL,
+  `version` varchar(128) NOT NULL,
   PRIMARY KEY (`version`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,18 +89,19 @@ CREATE TABLE `schema_migrations` (
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `users` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(200) COLLATE utf8mb4_general_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
-  `age` int NOT NULL,
-  `phone_number` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `profile_image` varchar(1000) DEFAULT NULL,
+  `password` varchar(200) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping routines for database 'express_45'
+-- Dumping routines for database 'westagram'
 --
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -120,11 +121,6 @@ CREATE TABLE `users` (
 
 LOCK TABLES `schema_migrations` WRITE;
 INSERT INTO `schema_migrations` (version) VALUES
-  ('20230417065623'),
-  ('20230417143645'),
-  ('20230417150638'),
-  ('20230417160552'),
-  ('20230417160607'),
   ('20230417160930'),
   ('20230417160949'),
   ('20230418054648'),

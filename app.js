@@ -1,11 +1,9 @@
+require("dotenv").config();
 
 const logger = require('morgan');
 const express = require('express');
 const cors = require('cors');
-const { DataSource } = require('typeorm');
-const http = require('http');
-
-const dotenv = require("dotenv").config();
+const { dataSource } = require('./src/models/dataSource');
 
 const routes = require("./src/routes/index");
 
@@ -17,17 +15,26 @@ app.use(express.json());
 app.use(routes);
 
 
+//health check
+app.get('/ping', function(req, res, next){
+    res.status(200).json({message: 'pong'})
+});
 
-// app.get('/ping', function(req, res, next){
-//     res.status(200).json({message: 'pong'})
-// });
-
-const server = http.createServer(app);
 const PORT = process.env.PORT;
 
 const start = async () => {
   try {
-    server.listen(PORT, () => console.log(`🚨 server listening on port ${PORT}`));
+    dataSource
+  .initialize()
+  .then(() => {
+    console.log("DataSource has been initialized!");
+  })
+  .catch((err) => {
+    console.log("DataSource Not Initialize :", err);
+    dataSource.destroy();
+  });
+
+    app.listen(PORT, () => console.log(`🚨 server listening on port ${PORT}`));
   } catch (err) {
     console.log(err);
   }
