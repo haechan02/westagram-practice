@@ -14,7 +14,7 @@ const createLike = async (req, res) => {
         await likeService.likePosts(parsedUserId, parsedPostId);
 
         return res.status(201).json({
-            message: 'LIKE_SUCCEED',
+            message: 'LIKE/UNLIKE_PROCESS_SUCCEED',
         });
 
     } catch (err) {

@@ -6,6 +6,7 @@ const likePosts = async (userId, postId) => {
 
         if (existingLike) {
             await likeDao.unlikePost(userId, postId);
+
             return "Post unliked successfully";
         } else {
             await likeDao.likePosts(userId, postId);
