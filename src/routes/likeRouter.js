@@ -3,7 +3,7 @@ const likeController = require('../controllers/likeController');
 
 const router = express.Router();
 
-router.post('/users/:userId/likes', likeController.createLike);
+router.post('/:userId/:postId/likes', likeController.createLike);
 
 module.exports = {
   router

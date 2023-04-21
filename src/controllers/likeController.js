@@ -1,25 +1,27 @@
-const { post } = require('../routes');
 const likeService = require('../services/likeService');
 
 const createLike = async (req, res) => {
-    try{
-        const { userId, postId} = req.body;
+    try {
+        const { userId, postId } = req.body;
 
         if (!userId || !postId) {
-            return res.status(400).json({ message: "Cannot Bring the Pages"});
+            return res.status(400).json({ message: "Cannot Process the Like" });
         }
 
-        await likeService.likePosts(userId, postId);
+        const parsedUserId = parseInt(userId);
+        const parsedPostId = parseInt(postId);
 
-        return res. status(201).json({
+        await likeService.likePosts(parsedUserId, parsedPostId);
+
+        return res.status(201).json({
             message: 'LIKE_SUCCEED',
         });
 
-    } catch(err) {
-        console.logo(err);
+    } catch (err) {
+        console.log(err);
         return res.status(err.statusCode || 500).json({
             message: err.message
-        })
+        });
     }
 };
 
